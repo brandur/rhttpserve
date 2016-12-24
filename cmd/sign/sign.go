@@ -25,19 +25,13 @@ var signCmd = &cobra.Command{
 	Use:   "sign",
 	Short: `Creates a shareable link.`,
 	Long: `
-rclone cat sends any files to standard output.
+rserve sign creates a shareable link with a valid signature
+and expiry. Its parameter should be a path relative to the
+remote's root.
 
-You can use it like this to output a single file
+Example usage:
 
-    rclone cat remote:path/to/file
-
-Or like this to output any file in dir or subdirectories.
-
-    rclone cat remote:path/to/dir
-
-Or like this to output any .txt files in dir or subdirectories.
-
-    rclone --include "*.txt" cat remote:path/to/dir
+	rserve sign my/file.pdf
 `,
 	Run: func(command *cobra.Command, args []string) {
 		cmd.CheckArgs(1, 1, command, args)

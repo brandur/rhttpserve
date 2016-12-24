@@ -21,19 +21,11 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: `Starts an HTTP server to serve files.`,
 	Long: `
-rclone cat sends any files to standard output.
+rserve serve starts an HTTP server to serve files from a remote for requests with a valid signature.
 
-You can use it like this to output a single file
+Example usage:
 
-    rclone cat remote:path/to/file
-
-Or like this to output any file in dir or subdirectories.
-
-    rclone cat remote:path/to/dir
-
-Or like this to output any .txt files in dir or subdirectories.
-
-    rclone --include "*.txt" cat remote:path/to/dir
+	PORT=8090 rserve serve
 `,
 	Run: func(command *cobra.Command, args []string) {
 		cmd.CheckArgs(0, 0, command, args)
