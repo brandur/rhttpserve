@@ -13,6 +13,7 @@ import (
 var Version = "v0.0.1"
 
 var (
+	Verbose bool
 	version bool
 )
 
@@ -40,7 +41,9 @@ func runRoot(cmd *cobra.Command, args []string) {
 func init() {
 	Root.Run = runRoot
 	Root.Flags().BoolVarP(&version, "version", "V", false, "Print the version number")
+	Root.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
 	cobra.OnInitialize(initConfig)
+
 }
 
 // NewFsSrc creates a new src fs from the arguments

@@ -5,10 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	cmd.Root.AddCommand(versionCmd)
-}
-
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: `Show the version number.`,
@@ -16,4 +12,8 @@ var versionCmd = &cobra.Command{
 		cmd.CheckArgs(0, 0, command, args)
 		cmd.ShowVersion()
 	},
+}
+
+func init() {
+	cmd.Root.AddCommand(versionCmd)
 }

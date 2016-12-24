@@ -1,9 +1,14 @@
 package common
 
-func GetRemotePath(path string) string {
-	return "secret:" + path
-}
+import (
+	"fmt"
+	"strings"
+)
 
-func Verify(path, expiresAt, signature string) bool {
-	return true
+func Message(path string, expiresAt int64) []byte {
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
+	return []byte(fmt.Sprintf("%v|%v", path, expiresAt))
 }
