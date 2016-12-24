@@ -1,11 +1,11 @@
-package cat
+package serve
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/brandur/rserve"
 	"github.com/brandur/rserve/cmd"
+	"github.com/brandur/rserve/common"
 	"github.com/ncw/rclone/fs"
 	"github.com/spf13/cobra"
 )
@@ -14,13 +14,35 @@ func init() {
 	cmd.Root.AddCommand(serveCmd)
 }
 
+func getParam(w http.ResponseWriter, r *http.Request, name string) (string, bool) {
+	param := r.URL.Query().Get(name)
+	if param == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Need parameter: " + name))
+		return "", false
+	}
+	return param, true
+}
+
 func serveFile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.NotFound(w, r)
 		return
 	}
 
-	rclonePath := rserve.GetRemotePath(r.URL.Path)
+	expiresAt, ok := getParam(w, r, "expires_at")
+	if !ok {
+		return
+	}
+
+	signature, ok := getParam(w, r, "signature")
+	if !ok {
+		return
+	}
+
+	_ = common.Verify(r.URL.Path, expiresAt, signature)
+
+	rclonePath := common.GetRemotePath(r.URL.Path)
 	log.Printf("Serving: %s", rclonePath)
 
 	fsrc := cmd.NewFsSrc([]string{rclonePath})

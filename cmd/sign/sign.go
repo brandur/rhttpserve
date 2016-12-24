@@ -1,4 +1,4 @@
-package cat
+package sign
 
 import (
 	"github.com/brandur/rserve/cmd"
