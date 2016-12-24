@@ -84,9 +84,9 @@ type FileServer struct {
 }
 
 func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
-	// Don't serve non-GET or anything at root (because we know it's not a
+	// Don't serve non-GET|HEAD or anything at root (because we know it's not a
 	// file).
-	if r.Method != "GET" || r.URL.Path == "/" {
+	if r.Method != "GET" && r.Method != "HEAD" || r.URL.Path == "/" {
 		http.NotFound(w, r)
 		return
 	}
@@ -142,10 +142,40 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rclonePath := s.Remote + ":" + r.URL.Path
-	log.Printf("Serving: %s", rclonePath)
 
 	fsrc := cmd.NewFsSrc([]string{rclonePath})
 
+	numObjects, size, err := fs.Count(fsrc)
+	if numObjects < 1 {
+		if cmd.Verbose {
+			log.Printf("No such object")
+		}
+
+		http.NotFound(w, r)
+	} else if numObjects > 1 {
+		if cmd.Verbose {
+			log.Printf("Can't serve directory")
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Can only serve single files"))
+		return
+	}
+
+	w.Header().Set("Content-Length", strconv.FormatInt(size, 10))
+	if cmd.Verbose {
+		log.Printf("Set size to %v (%v bytes)",
+			fs.SizeSuffix(size).Unit("Bytes"), size)
+	}
+
+	if r.Method == "HEAD" {
+		log.Printf("Serving HEAD: %s", rclonePath)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(""))
+		return
+	}
+
+	log.Printf("Serving: %s", rclonePath)
 	err = fs.Cat(fsrc, w)
 	if err != nil {
 		panic(err)
