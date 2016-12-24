@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/brandur/rserve/cmd"
@@ -15,7 +17,11 @@ import (
 	"golang.org/x/crypto/ed25519"
 )
 
-var serveCmd = &cobra.Command{
+var (
+	curl bool
+)
+
+var signCmd = &cobra.Command{
 	Use:   "sign",
 	Short: `Creates a shareable link.`,
 	Long: `
@@ -56,14 +62,24 @@ Or like this to output any .txt files in dir or subdirectories.
 
 		// Maybe make this configurable at some point.
 		expiresAt := time.Now().Add(48 * time.Hour)
-		url := generator.Generate(args[0], expiresAt)
+		url, err := generator.Generate(args[0], expiresAt)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+			os.Exit(1)
+		}
 
-		fmt.Printf("%s\n", url)
+		if curl {
+			filename := filepath.Base(args[0])
+			fmt.Printf("curl -o '%s' '%s'\n", filename, url)
+		} else {
+			fmt.Printf("%s\n", url)
+		}
 	},
 }
 
 func init() {
-	cmd.Root.AddCommand(serveCmd)
+	cmd.Root.AddCommand(signCmd)
+	signCmd.Flags().BoolVar(&curl, "curl", false, "Output as cURL command")
 }
 
 type Config struct {
@@ -76,11 +92,16 @@ type URLGenerator struct {
 	PrivateKey ed25519.PrivateKey
 }
 
-func (s *URLGenerator) Generate(path string, expiresAt time.Time) string {
+func (s *URLGenerator) Generate(path string, expiresAt time.Time) (string, error) {
+	scheme := "https"
+	if s.Host == "localhost" || strings.HasPrefix(s.Host, "localhost:") {
+		scheme = "http"
+	}
+
 	u := url.URL{
 		Host:   s.Host,
 		Path:   path,
-		Scheme: "https",
+		Scheme: scheme,
 	}
 
 	message := common.Message(path, expiresAt.Unix())
@@ -93,5 +114,5 @@ func (s *URLGenerator) Generate(path string, expiresAt time.Time) string {
 	u.RawQuery = fmt.Sprintf("expires_at=%v&signature=%v",
 		expiresAt.Unix(), base64.URLEncoding.EncodeToString(signature))
 
-	return u.String()
+	return u.String(), nil
 }

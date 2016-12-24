@@ -116,7 +116,10 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 
 	expiresAt := time.Unix(expiresAtInt, 0)
 	if expiresAt.Before(time.Now()) {
-		log.Printf("Stale expires_at")
+		if cmd.Verbose {
+			log.Printf("Stale expires_at")
+		}
+
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Link is no longer valid because expires_at is in the past"))
 		return
@@ -129,7 +132,10 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 
 	ok = ed25519.Verify(s.PublicKey, message, []byte(signatureStr))
 	if !ok {
-		log.Printf("Bad signature")
+		if cmd.Verbose {
+			log.Printf("Bad signature")
+		}
+
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Signature verification failed"))
 		return
@@ -144,6 +150,8 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Printf("Successfully served: %s", rclonePath)
 }
 
 func getParam(w http.ResponseWriter, r *http.Request, name string) (string, bool) {
