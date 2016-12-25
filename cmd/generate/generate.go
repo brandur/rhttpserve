@@ -2,11 +2,11 @@ package generate
 
 import (
 	"fmt"
-	"os"
 
 	"crypto/rand"
 	"encoding/base64"
 	"github.com/brandur/rserve/cmd"
+	"github.com/brandur/rserve/common"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ed25519"
 )
@@ -23,8 +23,7 @@ be used to sign and verify requests to and from the program.
 
 		public, private, err := generate()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-			os.Exit(1)
+			common.ExitWithError(err)
 		}
 
 		fmt.Printf("RSERVE_PUBLIC_KEY=%s\n", public)

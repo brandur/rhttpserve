@@ -60,26 +60,11 @@ Example usage:
 			common.ExitWithError(err)
 		}
 
-		resp, err := http.Head(url)
+		// Check that the URL that we just generated and the file that it
+		// points to is valid by issuing a HEAD request to the server.
+		err = checkURL(url)
 		if err != nil {
 			common.ExitWithError(err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != 200 {
-			// Re-request with GET so we can see a response body.
-			resp, err := http.Get(url)
-			if err != nil {
-				common.ExitWithError(err)
-			}
-			defer resp.Body.Close()
-
-			message, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				common.ExitWithError(err)
-			}
-
-			common.ExitWithError(fmt.Errorf(string(message)))
 		}
 
 		if curl {
@@ -89,11 +74,6 @@ Example usage:
 			fmt.Printf("%s\n", url)
 		}
 	},
-}
-
-func init() {
-	cmd.Root.AddCommand(signCmd)
-	signCmd.Flags().BoolVar(&curl, "curl", false, "Output as cURL command")
 }
 
 type Config struct {
@@ -129,4 +109,35 @@ func (s *URLGenerator) Generate(path string, expiresAt time.Time) (string, error
 		expiresAt.Unix(), base64.URLEncoding.EncodeToString(signature))
 
 	return u.String(), nil
+}
+
+func init() {
+	cmd.Root.AddCommand(signCmd)
+	signCmd.Flags().BoolVar(&curl, "curl", false, "Output as cURL command")
+}
+
+func checkURL(url string) error {
+	resp, err := http.Head(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		// Re-request with GET so we can see a response body.
+		resp, err := http.Get(url)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		message, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		return fmt.Errorf(string(message))
+	}
+
+	return nil
 }

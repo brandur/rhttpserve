@@ -56,10 +56,6 @@ Example usage:
 	},
 }
 
-func init() {
-	cmd.Root.AddCommand(serveCmd)
-}
-
 type Config struct {
 	Port      string `env:"PORT,default=8090"`
 	PublicKey string `env:"RSERVE_PUBLIC_KEY,required"`
@@ -189,6 +185,10 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Successfully served: %s", rclonePath)
+}
+
+func init() {
+	cmd.Root.AddCommand(serveCmd)
 }
 
 func getParam(w http.ResponseWriter, r *http.Request, name string) (string, bool) {
