@@ -3,9 +3,10 @@ package sign
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -39,14 +40,12 @@ Example usage:
 		var conf Config
 		err := envdecode.Decode(&conf)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-			os.Exit(1)
+			common.ExitWithError(err)
 		}
 
 		privateKey, err := base64.URLEncoding.DecodeString(conf.PrivateKey)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-			os.Exit(1)
+			common.ExitWithError(err)
 		}
 
 		generator := URLGenerator{
@@ -58,8 +57,29 @@ Example usage:
 		expiresAt := time.Now().Add(48 * time.Hour)
 		url, err := generator.Generate(args[0], expiresAt)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-			os.Exit(1)
+			common.ExitWithError(err)
+		}
+
+		resp, err := http.Head(url)
+		if err != nil {
+			common.ExitWithError(err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			// Re-request with GET so we can see a response body.
+			resp, err := http.Get(url)
+			if err != nil {
+				common.ExitWithError(err)
+			}
+			defer resp.Body.Close()
+
+			message, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				common.ExitWithError(err)
+			}
+
+			common.ExitWithError(fmt.Errorf(string(message)))
 		}
 
 		if curl {

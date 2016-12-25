@@ -2,10 +2,8 @@ package serve
 
 import (
 	"encoding/base64"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -33,14 +31,12 @@ Example usage:
 		var conf Config
 		err := envdecode.Decode(&conf)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-			os.Exit(1)
+			common.ExitWithError(err)
 		}
 
 		publicKey, err := base64.URLEncoding.DecodeString(conf.PublicKey)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-			os.Exit(1)
+			common.ExitWithError(err)
 		}
 
 		server := FileServer{
@@ -135,16 +131,35 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 
 	rclonePath := s.Remote + ":" + r.URL.Path
 
+	// Rclone (or more specifically, newFsSrc, which is copied from rclone)
+	// mutates config between runs on single files in a way that doesn't
+	// allow it to be run twice in succession, so reset filters between runs.
+	fs.Config.Filter, err = fs.NewFilter()
+	if err != nil {
+		log.Printf("Failed to load filters: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(""))
+	}
+
 	fsrc := cmd.NewFsSrc([]string{rclonePath})
 
 	numObjects, size, err := fs.Count(fsrc)
-	if numObjects < 1 {
+
+	if err == fs.ErrorDirNotFound {
 		if cmd.Verbose {
 			log.Printf("No such object")
 		}
 
 		http.NotFound(w, r)
-	} else if numObjects > 1 {
+		return
+	} else if err != nil {
+		log.Printf("Error: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(""))
+		return
+	}
+
+	if numObjects > 1 {
 		if cmd.Verbose {
 			log.Printf("Can't serve directory")
 		}
