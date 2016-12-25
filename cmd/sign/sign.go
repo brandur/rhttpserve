@@ -19,7 +19,8 @@ import (
 )
 
 var (
-	curl bool
+	curl      bool
+	skipCheck bool
 )
 
 var signCmd = &cobra.Command{
@@ -35,7 +36,7 @@ Example usage:
 	rserve sign my/file.pdf
 `,
 	Run: func(command *cobra.Command, args []string) {
-		cmd.CheckArgs(1, 1, command, args)
+		cmd.CheckArgs(1, 99999, command, args)
 
 		var conf Config
 		err := envdecode.Decode(&conf)
@@ -53,25 +54,30 @@ Example usage:
 			PrivateKey: ed25519.PrivateKey(privateKey),
 		}
 
-		// Maybe make this configurable at some point.
-		expiresAt := time.Now().Add(48 * time.Hour)
-		url, err := generator.Generate(args[0], expiresAt)
-		if err != nil {
-			common.ExitWithError(err)
-		}
+		for _, arg := range args {
+			// Maybe make this configurable at some point.
+			expiresAt := time.Now().Add(48 * time.Hour)
 
-		// Check that the URL that we just generated and the file that it
-		// points to is valid by issuing a HEAD request to the server.
-		err = checkURL(url)
-		if err != nil {
-			common.ExitWithError(err)
-		}
+			url, err := generator.Generate(arg, expiresAt)
+			if err != nil {
+				common.ExitWithError(err)
+			}
 
-		if curl {
-			filename := filepath.Base(args[0])
-			fmt.Printf("curl -o '%s' '%s'\n", filename, url)
-		} else {
-			fmt.Printf("%s\n", url)
+			// Check that the URL that we just generated and the file that it
+			// points to is valid by issuing a HEAD request to the server.
+			if !skipCheck {
+				err = checkURL(url)
+				if err != nil {
+					common.ExitWithError(err)
+				}
+			}
+
+			if curl {
+				filename := filepath.Base(arg)
+				fmt.Printf("curl -o '%s' '%s'\n", filename, url)
+			} else {
+				fmt.Printf("%s\n", url)
+			}
 		}
 	},
 }
@@ -114,6 +120,8 @@ func (s *URLGenerator) Generate(path string, expiresAt time.Time) (string, error
 func init() {
 	cmd.Root.AddCommand(signCmd)
 	signCmd.Flags().BoolVar(&curl, "curl", false, "Output as cURL command")
+	signCmd.Flags().BoolVar(&skipCheck, "skip-check", false,
+		"Skip issuing server check of generated URL")
 }
 
 func checkURL(url string) error {
