@@ -200,6 +200,9 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Try to force browsers to download the link instead of display it.
+	w.Header().Set("Content-Disposition", "attachment")
+
 	log.Printf("Serving: %s", rclonePath)
 	err = fs.Cat(fsrc, w)
 	if err != nil {
