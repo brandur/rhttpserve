@@ -10,10 +10,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Version = "v0.0.1"
+// Version is rserve's current version number.
+const Version = "v0.0.1"
 
 var (
+	// Verbose tracks whether a verbose flag was passed into the command line.
 	Verbose bool
+
+	// version tracks whether a version flag was passed into the command line.
 	version bool
 )
 

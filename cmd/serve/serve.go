@@ -67,17 +67,22 @@ Example usage:
 	},
 }
 
+// Config stores the configuration required by the serve command.
 type Config struct {
 	Port      string `env:"PORT,default=8090"`
 	PublicKey string `env:"RSERVE_PUBLIC_KEY,required"`
 	Remote    string `env:"RSERVE_REMOTE,required"`
 }
 
+// FileServer is a basic encapsulation of the necessary information to serve a
+// file out of an rclone remote.
 type FileServer struct {
 	PublicKey ed25519.PublicKey
 	Remote    string
 }
 
+// ServeFile serves a file out of an rclone remote based on the request path
+// and whether a valid signature was included.
 func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 	// Don't serve non-GET|HEAD or anything at root (because we know it's not a
 	// file).

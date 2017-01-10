@@ -82,16 +82,20 @@ Example usage:
 	},
 }
 
+// Config stores the configuration required by the sign command.
 type Config struct {
 	Host       string `env:"RSERVE_HOST,required"`
 	PrivateKey string `env:"RSERVE_PRIVATE_KEY,required"`
 }
 
+// URLGenerator is a basic encapsulation of the information necessary to
+// generated a signed URL for an rserve server.
 type URLGenerator struct {
 	Host       string
 	PrivateKey ed25519.PrivateKey
 }
 
+// Generate generates a URL based off a remote path and an expiry time.
 func (s *URLGenerator) Generate(path string, expiresAt time.Time) (string, error) {
 	scheme := "https"
 	if s.Host == "localhost" || strings.HasPrefix(s.Host, "localhost:") {
