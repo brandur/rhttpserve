@@ -59,22 +59,28 @@ equivalent.
 With both server and client set up, it's now possible to
 have rserve generate a URL for a file in your remote:
 
-    rserve sign myremote:papers/raft.pdf
+    $ rserve sign myremote:papers/raft.pdf
+    https://serve.example.com/myremote/papers/raft.pdf?expires_at=1484239044&signature=QH816bQ_OlGDIIOHfhFYYTlSvVqtlNyboRgQDLJLp1R6wEU4tivChyPXIOOKETH_kvWN-UEakhNgVFU00jdIAA==
+
+Or change the output to be a cURL command:
+
+    $ rserve sign --curl myremote:papers/raft.pdf
+    curl -o 'raft.pdf' 'https://serve.example.com/myremote/papers/raft.pdf?expires_at=1484239058&signature=x7u1d6D3TXyieXEQ88wTcrheQWm6NI9wBGFbJbqjliq6YiRO38OSeB777xFUZ46tNlnnTCaYpoxNWRYNVIl1BA=='
 
 Compose with `xargs` to sign all files in a directory:
 
-    rclone ls -q myremote:papers/ | awk '{print "myremote:papers/" $2}' | xargs rserve sign --curl --skip-check
+    $ rclone ls -q myremote:papers/ | awk '{print "myremote:papers/" $2}' | xargs rserve sign --curl --skip-check
 
 ## Development
 
 ## Run Tests
 
-    go test $(go list ./... | egrep -v '/vendor/')
+    $ go test $(go list ./... | egrep -v '/vendor/')
 
 ## Vendoring Dependencies
 
 Dependencies are managed with govendor. New ones can be vendored using these
 commands:
 
-    go get -u github.com/kardianos/govendor
-    govendor add +external
+    $ go get -u github.com/kardianos/govendor
+    $ govendor add +external
