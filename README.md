@@ -1,4 +1,4 @@
-# rserve
+# rserve [![Build Status](https://travis-ci.org/brandur/rserve.svg?branch=master)](https://travis-ci.org/brandur/rserve)
 
 A small HTTP server
 
