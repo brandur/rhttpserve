@@ -1,6 +1,13 @@
 # rserve [![Build Status](https://travis-ci.org/brandur/rserve.svg?branch=master)](https://travis-ci.org/brandur/rserve)
 
-A small HTTP server
+A small HTTP server that can serve files out of an rclone
+remote paired with a command line signing utility that
+allows a user to generate and pass around signed URLs for
+the server that expire after a fixed amount of time.
+
+This allows files to be shared simply of any rclone remote
+without having to configure special sharing access for each
+service.
 
 ## Setup
 
