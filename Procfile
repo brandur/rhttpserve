@@ -1,1 +1,1 @@
-serve: rserve -v serve
+web: rserve -v serve
