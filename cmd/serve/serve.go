@@ -2,9 +2,12 @@ package serve
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/brandur/rserve/cmd"
@@ -32,6 +35,14 @@ Example usage:
 		err := envdecode.Decode(&conf)
 		if err != nil {
 			common.ExitWithError(err)
+		}
+
+		// Check that the remote is configured in env. We don't actually need
+		// to read it htough; that will be handled internally by rclone.
+		envRemoteName := "RCLONE_CONFIG_" + strings.ToUpper(strings.Replace(conf.Remote+"_TYPE", "-", "_", -1))
+		_, found := os.LookupEnv(envRemoteName)
+		if !found {
+			common.ExitWithError(fmt.Errorf(`variable "%v" is missing`, envRemoteName))
 		}
 
 		publicKey, err := base64.URLEncoding.DecodeString(conf.PublicKey)
@@ -146,7 +157,8 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 			log.Printf("No such object")
 		}
 
-		http.NotFound(w, r)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("No such object"))
 		return
 	} else if err != nil {
 		log.Printf("Error: %v", err)

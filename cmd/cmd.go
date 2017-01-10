@@ -43,7 +43,6 @@ func init() {
 	Root.Flags().BoolVarP(&version, "version", "V", false, "Print the version number")
 	Root.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Verbose output")
 	cobra.OnInitialize(initConfig)
-
 }
 
 // NewFsSrc creates a new src fs from the arguments
