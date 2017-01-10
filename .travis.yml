@@ -1,0 +1,17 @@
+language: go
+
+go:
+  - 1.7
+
+# magic word to use faster/newer container-based architecture
+sudo: false
+
+before_install:
+  - go get -u github.com/golang/lint/golint
+
+script:
+  - go install
+
+notifications:
+  email:
+    on_success: never
