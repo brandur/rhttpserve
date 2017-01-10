@@ -67,6 +67,10 @@ Compose with `xargs` to sign all files in a directory:
 
 ## Development
 
+## Run Tests
+
+    go test $(go list ./... | egrep -v '/vendor/')
+
 ## Vendoring Dependencies
 
 Dependencies are managed with govendor. New ones can be vendored using these
