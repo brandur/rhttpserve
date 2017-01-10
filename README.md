@@ -5,9 +5,9 @@ remote paired with a command line signing utility that
 allows a user to generate and pass around signed URLs for
 the server that expire after a fixed amount of time.
 
-This allows files to be shared simply of any rclone remote
-without having to configure special sharing access for each
-service.
+This allows files to be shared simply out of any rclone
+remote without having to configure special sharing access
+for users on any particular storage service.
 
 ## Setup
 
