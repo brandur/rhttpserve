@@ -57,3 +57,11 @@ Compose with `xargs` to sign all files in a directory:
     rclone ls -q secret:magazines/mercantallist.the/ | awk '{print $2}' | xargs rserve sign --curl --skip-check
 
 ## Development
+
+## Vendoring Dependencies
+
+Dependencies are managed with govendor. New ones can be vendored using these
+commands:
+
+    go get -u github.com/kardianos/govendor
+    govendor add +external
