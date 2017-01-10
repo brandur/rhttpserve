@@ -59,11 +59,11 @@ equivalent.
 With both server and client set up, it's now possible to
 have rserve generate a URL for a file in your remote:
 
-    rserve sign myremote:magazines/mercantallist.the/mercantallist.the.2015-07-04.pdf
+    rserve sign myremote:papers/raft.pdf
 
 Compose with `xargs` to sign all files in a directory:
 
-    rclone ls -q myremote:magazines/mercantallist.the/ | awk '{print "myremote:magazines/mercantallist.the/" $2}' | xargs rserve sign --curl --skip-check
+    rclone ls -q myremote:papers/ | awk '{print "myremote:papers/" $2}' | xargs rserve sign --curl --skip-check
 
 ## Development
 
