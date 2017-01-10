@@ -11,7 +11,8 @@ before_install:
 
 script:
   - go install
-  - go vet
+  - go test $(go list ./... | egrep -v '/vendor/')
+  - go vet $(go list ./... | egrep -v '/vendor/')
 
   # Note that unfortunately Golint doesn't work like other Go commands: it only
   # takes only a single argument at a time and expects that each is the name of a
