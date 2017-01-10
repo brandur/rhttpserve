@@ -6,5 +6,5 @@ import (
 )
 
 func TestMessage(t *testing.T) {
-	assert.Equal(t, "/path/to/file|123", string(Message("path/to/file", 123)))
+	assert.Equal(t, "remote|path/to/file|123", string(Message("remote", "path/to/file", 123)))
 }

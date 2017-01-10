@@ -9,6 +9,10 @@ This allows files to be shared simply out of any rclone
 remote without having to configure special sharing access
 for users on any particular storage service.
 
+## Build
+
+    $ go install
+
 ## Setup
 
 Generate a public/private key pair:
@@ -19,21 +23,19 @@ Generate a public/private key pair:
 
 ### Server
 
-The server needs to be configured with a public key and the
-name of the rclone remote to read from:
+The server needs to be configured with a public key:
 
     $ export RSERVE_PUBLIC_KEY=
-    $ export RSERVE_REMOTE=myremote
 
-The rclone remote should also be appropriately configured
-through environment variables:
+Any rclone remotes you plan on serving files from should
+also be configured in the environment:
 
     $ export RCLONE_CONFIG_REMOTE_TYPE="amazon cloud drive"
     $ export RCLONE_CONFIG_REMOTE_CLIENT_ID=
     $ export RCLONE_CONFIG_REMOTE_CLIENT_SECRET=
     $ export RCLONE_CONFIG_REMOTE_TOKEN=
 
-It can then be started with:
+The server can then be started with:
 
     $ rserve serve
 
@@ -57,11 +59,11 @@ equivalent.
 With both server and client set up, it's now possible to
 have rserve generate a URL for a file in your remote:
 
-    rserve sign magazines/mercantallist.the/mercantallist.the.2015-07-04.pdf
+    rserve sign myremote:magazines/mercantallist.the/mercantallist.the.2015-07-04.pdf
 
 Compose with `xargs` to sign all files in a directory:
 
-    rclone ls -q secret:magazines/mercantallist.the/ | awk '{print $2}' | xargs rserve sign --curl --skip-check
+    rclone ls -q myremote:magazines/mercantallist.the/ | awk '{print "myremote:magazines/mercantallist.the/" $2}' | xargs rserve sign --curl --skip-check
 
 ## Development
 

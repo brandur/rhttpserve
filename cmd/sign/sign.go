@@ -58,7 +58,7 @@ Example usage:
 			// Maybe make this configurable at some point.
 			expiresAt := time.Now().Add(48 * time.Hour)
 
-			url, err := generator.Generate(arg, expiresAt)
+			url, filename, err := generator.Generate(arg, expiresAt)
 			if err != nil {
 				common.ExitWithError(err)
 			}
@@ -73,7 +73,6 @@ Example usage:
 			}
 
 			if curl {
-				filename := filepath.Base(arg)
 				fmt.Printf("curl -o '%s' '%s'\n", filename, url)
 			} else {
 				fmt.Printf("%s\n", url)
@@ -96,19 +95,26 @@ type URLGenerator struct {
 }
 
 // Generate generates a URL based off a remote path and an expiry time.
-func (s *URLGenerator) Generate(path string, expiresAt time.Time) (string, error) {
+func (s *URLGenerator) Generate(remoteAndPath string, expiresAt time.Time) (string, string, error) {
 	scheme := "https"
 	if s.Host == "localhost" || strings.HasPrefix(s.Host, "localhost:") {
 		scheme = "http"
 	}
 
+	parts := strings.Split(remoteAndPath, ":")
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("arguments should be of the form of remote:path/to/file")
+	}
+	remote := parts[0]
+	path := parts[1]
+
 	u := url.URL{
 		Host:   s.Host,
-		Path:   path,
+		Path:   remote + "/" + path,
 		Scheme: scheme,
 	}
 
-	message := common.Message(path, expiresAt.Unix())
+	message := common.Message(remote, path, expiresAt.Unix())
 	if cmd.Verbose {
 		log.Printf("Message: %v", string(message))
 	}
@@ -118,7 +124,8 @@ func (s *URLGenerator) Generate(path string, expiresAt time.Time) (string, error
 	u.RawQuery = fmt.Sprintf("expires_at=%v&signature=%v",
 		expiresAt.Unix(), base64.URLEncoding.EncodeToString(signature))
 
-	return u.String(), nil
+	filename := filepath.Base(path)
+	return u.String(), filename, nil
 }
 
 func init() {

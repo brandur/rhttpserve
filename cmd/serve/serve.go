@@ -2,7 +2,6 @@ package serve
 
 import (
 	"encoding/base64"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -37,14 +36,6 @@ Example usage:
 			common.ExitWithError(err)
 		}
 
-		// Check that the remote is configured in env. We don't actually need
-		// to read it htough; that will be handled internally by rclone.
-		envRemoteName := "RCLONE_CONFIG_" + strings.ToUpper(strings.Replace(conf.Remote+"_TYPE", "-", "_", -1))
-		_, found := os.LookupEnv(envRemoteName)
-		if !found {
-			common.ExitWithError(fmt.Errorf(`variable "%v" is missing`, envRemoteName))
-		}
-
 		publicKey, err := base64.URLEncoding.DecodeString(conf.PublicKey)
 		if err != nil {
 			common.ExitWithError(err)
@@ -52,7 +43,6 @@ Example usage:
 
 		server := FileServer{
 			PublicKey: ed25519.PublicKey(publicKey),
-			Remote:    conf.Remote,
 		}
 
 		mux := http.NewServeMux()
@@ -71,14 +61,12 @@ Example usage:
 type Config struct {
 	Port      string `env:"PORT,default=8090"`
 	PublicKey string `env:"RSERVE_PUBLIC_KEY,required"`
-	Remote    string `env:"RSERVE_REMOTE,required"`
 }
 
 // FileServer is a basic encapsulation of the necessary information to serve a
 // file out of an rclone remote.
 type FileServer struct {
 	PublicKey ed25519.PublicKey
-	Remote    string
 }
 
 // ServeFile serves a file out of an rclone remote based on the request path
@@ -125,7 +113,18 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := common.Message(r.URL.Path, expiresAtInt)
+	// Note the first part will be empty because we start with a leading slash.
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 3 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid request path"))
+		return
+	}
+
+	remote := parts[1]
+	path := strings.Join(parts[2:], "/")
+
+	message := common.Message(remote, path, expiresAtInt)
 	if cmd.Verbose {
 		log.Printf("Message: %v", string(message))
 	}
@@ -141,7 +140,13 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rclonePath := s.Remote + ":" + r.URL.Path
+	if !checkRemoteConfig(remote) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Remote " + remote + " not configured in server environment"))
+		return
+	}
+
+	rclonePath := remote + ":" + path
 
 	// Rclone (or more specifically, newFsSrc, which is copied from rclone)
 	// mutates config between runs on single files in a way that doesn't
@@ -206,6 +211,12 @@ func (s *FileServer) ServeFile(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	cmd.Root.AddCommand(serveCmd)
+}
+
+func checkRemoteConfig(remote string) bool {
+	envRemoteName := "RCLONE_CONFIG_" + strings.ToUpper(strings.Replace(remote+"_TYPE", "-", "_", -1))
+	_, found := os.LookupEnv(envRemoteName)
+	return found
 }
 
 func getParam(w http.ResponseWriter, r *http.Request, name string) (string, bool) {
