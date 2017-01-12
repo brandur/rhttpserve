@@ -646,34 +646,17 @@ func Check(fdst, fsrc Fs) error {
 // Lists in parallel which may get them out of order
 func ListFn(f Fs, fn func(Object)) error {
 	list := NewLister().SetFilter(Config.Filter).SetLevel(Config.MaxDepth).Start(f, "")
-
-	var outerErr error
-	var outerErrMut sync.Mutex
-
 	var wg sync.WaitGroup
 	wg.Add(Config.Checkers)
-
 	for i := 0; i < Config.Checkers; i++ {
 		go func() {
 			defer wg.Done()
 			for {
-				// If an error has been set somewhere then simply return from
-				// work.
-				outerErrMut.Lock()
-				if outerErr != nil {
-					return
-				}
-				outerErrMut.Unlock()
-
 				o, err := list.GetObject()
 				if err != nil {
-					// If an error has already been set then another worker has
-					// already beaten us to it. Return peacefully.
-					outerErrMut.Lock()
-					if outerErr == nil {
-						outerErr = err
-					}
-					outerErrMut.Unlock()
+					// The error will be persisted within the Lister object and
+					// we'll get an opportunity to return it as we leave this
+					// function.
 					return
 				}
 				// check if we are finished
@@ -687,7 +670,7 @@ func ListFn(f Fs, fn func(Object)) error {
 		}()
 	}
 	wg.Wait()
-	return outerErr
+	return list.Error()
 }
 
 // mutex for synchronized output
