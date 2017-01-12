@@ -1,13 +1,14 @@
 # rhttpserve [![Build Status](https://travis-ci.org/brandur/rhttpserve.svg?branch=master)](https://travis-ci.org/brandur/rhttpserve)
 
-An HTTP server that can serve files out of an rclone
+A tiny HTTP server that can serve files out of any rclone
 remote. Includes a command line utility to generate time
-expiring signed URLs (in the style of S3) that will be
-verified by the server.
+expiring Ed25519-based signed URLs (similar to a signed S3
+URL) that will be verified by the server before it agrees
+to send a file.
 
 This has the effect of allowing files to be shared simply
-(and temporarily) without having to walk through web-based
-sharing prompts and the like.
+(and temporarily) without having to walk through
+provider-specific web-based sharing prompts and the like.
 
 ## Build
 
@@ -73,7 +74,11 @@ have rhttpserve generate a URL for a file in your remote:
     $ rhttpserve sign myremote:papers/raft.pdf
     https://serve.example.com/myremote/papers/raft.pdf?expires_at=1484239044&signature=QH816bQ_OlGDIIOHfhFYYTlSvVqtlNyboRgQDLJLp1R6wEU4tivChyPXIOOKETH_kvWN-UEakhNgVFU00jdIAA==
 
-Or change the output to be a cURL command:
+After generating a signature, the client performs a `HEAD`
+request to the server to make sure that the object exists.
+This check can be skipped with the `--skip-check` option.
+
+Alternatively, change the output to be a cURL command:
 
     $ rhttpserve sign --curl myremote:papers/raft.pdf
     curl -o 'raft.pdf' 'https://serve.example.com/myremote/papers/raft.pdf?expires_at=1484239058&signature=x7u1d6D3TXyieXEQ88wTcrheQWm6NI9wBGFbJbqjliq6YiRO38OSeB777xFUZ46tNlnnTCaYpoxNWRYNVIl1BA=='
