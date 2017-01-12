@@ -43,6 +43,10 @@ The remote above is called `MYREMOTE` and can be reference
 below with `myremote:`. Naming conventions follow rclone's
 normal standard for environment variables.
 
+The easiest way to get values for these variables is to run
+`rclone config` and then copy the results that were placed
+in `~/.rclone.conf`.
+
 The server can then be started with:
 
     $ rhttpserve serve
