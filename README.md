@@ -40,8 +40,8 @@ also be configured in the environment:
     $ export RCLONE_CONFIG_MYREMOTE_TOKEN=
 
 The remote above is called `MYREMOTE` and can be reference
-below with `myremote:`. Naming conventions by rclone's
-normal standard.
+below with `myremote:`. Naming conventions follow rclone's
+normal standard for environment variables.
 
 The server can then be started with:
 
