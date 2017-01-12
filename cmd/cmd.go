@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Version is rserve's current version number.
+// Version is rhttpserve's current version number.
 const Version = "v0.0.1"
 
 var (
@@ -21,12 +21,12 @@ var (
 	version bool
 )
 
-// Root is the main rserve command
+// Root is the main rhttpserve command
 var Root = &cobra.Command{
-	Use:   "rserve",
+	Use:   "rhttpserve",
 	Short: "Serves files out of an rclone store.",
 	Long: `
-Rserve is a command line program to private serve files out of an rclone store.
+Rhttpserve is a command line program to private serve files out of an rclone store.
 `,
 }
 

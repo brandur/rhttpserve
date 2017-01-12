@@ -1,7 +1,7 @@
 package version
 
 import (
-	"github.com/brandur/rserve/cmd"
+	"github.com/brandur/rhttpserve/cmd"
 	"github.com/spf13/cobra"
 )
 

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brandur/rserve/cmd"
-	"github.com/brandur/rserve/common"
+	"github.com/brandur/rhttpserve/cmd"
+	"github.com/brandur/rhttpserve/common"
 	"github.com/joeshaw/envdecode"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ed25519"
@@ -27,13 +27,12 @@ var signCmd = &cobra.Command{
 	Use:   "sign",
 	Short: `Creates a shareable link.`,
 	Long: `
-rserve sign creates a shareable link with a valid signature
-and expiry. Its parameter should be a path relative to the
-remote's root.
+Creates a shareable link with a valid signature and expiry. Its parameter
+should be a path relative to the remote's root.
 
 Example usage:
 
-	rserve sign my/file.pdf
+	rhttpserve sign my/file.pdf
 `,
 	Run: func(command *cobra.Command, args []string) {
 		cmd.CheckArgs(1, 99999, command, args)
@@ -83,12 +82,12 @@ Example usage:
 
 // Config stores the configuration required by the sign command.
 type Config struct {
-	Host       string `env:"RSERVE_HOST,required"`
-	PrivateKey string `env:"RSERVE_PRIVATE_KEY,required"`
+	Host       string `env:"RHTTPSERVE_HOST,required"`
+	PrivateKey string `env:"RHTTPSERVE_PRIVATE_KEY,required"`
 }
 
 // URLGenerator is a basic encapsulation of the information necessary to
-// generated a signed URL for an rserve server.
+// generated a signed URL for an rhttpserve server.
 type URLGenerator struct {
 	Host       string
 	PrivateKey ed25519.PrivateKey

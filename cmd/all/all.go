@@ -3,9 +3,9 @@ package all
 
 import (
 	// Active commands
-	_ "github.com/brandur/rserve/cmd"
-	_ "github.com/brandur/rserve/cmd/generate"
-	_ "github.com/brandur/rserve/cmd/serve"
-	_ "github.com/brandur/rserve/cmd/sign"
-	_ "github.com/brandur/rserve/cmd/version"
+	_ "github.com/brandur/rhttpserve/cmd"
+	_ "github.com/brandur/rhttpserve/cmd/generate"
+	_ "github.com/brandur/rhttpserve/cmd/serve"
+	_ "github.com/brandur/rhttpserve/cmd/sign"
+	_ "github.com/brandur/rhttpserve/cmd/version"
 )

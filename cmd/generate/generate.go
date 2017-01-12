@@ -5,8 +5,8 @@ import (
 
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/brandur/rserve/cmd"
-	"github.com/brandur/rserve/common"
+	"github.com/brandur/rhttpserve/cmd"
+	"github.com/brandur/rhttpserve/common"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ed25519"
 )
@@ -15,8 +15,8 @@ var serveCmd = &cobra.Command{
 	Use:   "generate",
 	Short: `Generates a public/private key pair.`,
 	Long: `
-rserve generate generates a public/private key pair that can
-be used to sign and verify requests to and from the program.
+Generates a public/private key pair that can be used to sign and verify
+requests to and from the program.
 `,
 	Run: func(command *cobra.Command, args []string) {
 		cmd.CheckArgs(0, 0, command, args)
@@ -26,8 +26,8 @@ be used to sign and verify requests to and from the program.
 			common.ExitWithError(err)
 		}
 
-		fmt.Printf("RSERVE_PUBLIC_KEY=%s\n", public)
-		fmt.Printf("RSERVE_PRIVATE_KEY=%s\n", private)
+		fmt.Printf("RHTTPSERVE_PUBLIC_KEY=%s\n", public)
+		fmt.Printf("RHTTPSERVE_PRIVATE_KEY=%s\n", private)
 	},
 }
 

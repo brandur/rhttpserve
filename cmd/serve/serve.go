@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brandur/rserve/cmd"
-	"github.com/brandur/rserve/common"
+	"github.com/brandur/rhttpserve/cmd"
+	"github.com/brandur/rhttpserve/common"
 	"github.com/joeshaw/envdecode"
 	"github.com/ncw/rclone/fs"
 	"github.com/spf13/cobra"
@@ -21,11 +21,12 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: `Starts an HTTP server to serve files.`,
 	Long: `
-rserve serve starts an HTTP server to serve files from a remote for requests with a valid signature.
+Starts an HTTP server to serve files from a remote for requests with a valid
+signature.
 
 Example usage:
 
-	PORT=8090 rserve serve
+	PORT=8090 rhttpserve serve
 `,
 	Run: func(command *cobra.Command, args []string) {
 		cmd.CheckArgs(0, 0, command, args)
@@ -60,7 +61,7 @@ Example usage:
 // Config stores the configuration required by the serve command.
 type Config struct {
 	Port      string `env:"PORT,default=8090"`
-	PublicKey string `env:"RSERVE_PUBLIC_KEY,required"`
+	PublicKey string `env:"RHTTPSERVE_PUBLIC_KEY,required"`
 }
 
 // FileServer is a basic encapsulation of the necessary information to serve a
