@@ -18,22 +18,29 @@ sharing prompts and the like.
 Generate a public/private key pair:
 
     $ rserve generate
-    RSERVE_PUBLIC_KEY=
-    RSERVE_PRIVATE_KEY=
+
+This will produce `RSERVE_PUBLIC_KEY` and
+`RSERVE_PRIVATE_KEY`, which you will need to set up the
+server and client respectively.
 
 ### Server
 
-The server needs to be configured with a public key:
+The server needs to be configured with a public key so that
+it can verify requests signed by client private keys:
 
     $ export RSERVE_PUBLIC_KEY=
 
 Any rclone remotes you plan on serving files from should
 also be configured in the environment:
 
-    $ export RCLONE_CONFIG_REMOTE_TYPE="amazon cloud drive"
-    $ export RCLONE_CONFIG_REMOTE_CLIENT_ID=
-    $ export RCLONE_CONFIG_REMOTE_CLIENT_SECRET=
-    $ export RCLONE_CONFIG_REMOTE_TOKEN=
+    $ export RCLONE_CONFIG_MYREMOTE_TYPE="amazon cloud drive"
+    $ export RCLONE_CONFIG_MYREMOTE_CLIENT_ID=
+    $ export RCLONE_CONFIG_MYREMOTE_CLIENT_SECRET=
+    $ export RCLONE_CONFIG_MYREMOTE_TOKEN=
+
+The remote above is called `MYREMOTE` and can be reference
+below with `myremote:`. Naming conventions by rclone's
+normal standard.
 
 The server can then be started with:
 
@@ -49,6 +56,10 @@ is listening on:
 
     $ export RSERVE_PRIVATE_KEY=
     $ export RSERVE_HOST=localhost:8090
+
+We use a local host value, but it could just as easily be
+something like `serve.example.com`, just as long as rserve
+is listening on that server.
 
 Because you'll likely be running the client locally, it
 might be useful to store these values in your `.zshrc` or
