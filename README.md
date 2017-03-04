@@ -89,7 +89,7 @@ Alternatively, change the output to be a cURL command:
 
 Compose with `xargs` to sign all files in a directory:
 
-    $ rclone ls -q myremote:papers/ | awk '{print "myremote:papers/" $2}' | xargs rhttpserve sign --curl --skip-check
+    $ rclone ls -q myremote:papers/ | awk '{$1=""; out=$0; gsub(/^ /, "myremote:papers/", out); print "\"" out "\""}' | xargs rhttpserve sign --curl --skip-check
 
 ## Development
 
